@@ -105,6 +105,17 @@ function! s:FractionFormat(fraction)
     return printf("%.0f", n)
 endfunction
 
+function! s:CalculateSignColumnWidth() abort
+    if has('signs')
+        if !empty(sign_getplaced(bufname('%'), { 'group': '*' })[0]['signs'])
+            return 2
+        elseif &signcolumn == 'yes'
+            return 2
+        endif
+    endif
+    return 0
+endfunction
+
 function! FoldText()
     " Returns a line representing the folded text
     "
@@ -169,7 +180,9 @@ function! FoldText()
     endif
     let foldColumnWidth = &foldcolumn ? 1 : 0
     let numberColumnWidth = &number ? strwidth(line('$')) : 0
+    let signColumnWidth = s:CalculateSignColumnWidth()
     let width = winwidth(0) - foldColumnWidth - numberColumnWidth - g:FoldText_gap
+    let width -= signColumnWidth
 
     let foldSize = 1 + v:foldend - v:foldstart
     let foldSizeStr = printf("%s%s%s", g:FoldText_line, g:FoldText_multiplication, foldSize)
