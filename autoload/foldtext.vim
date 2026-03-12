@@ -7,14 +7,14 @@ function! s:FractionsBetween(lo, hi, denominator) abort
     let l:lo = a:lo[0] / a:lo[1]
     let l:hi = a:hi[0] / a:hi[1]
     let l:fractions = []
-	let l:n = 1.0
-	while l:n < a:denominator
+    let l:n = 1.0
+    while l:n < a:denominator
         let l:p = l:n / a:denominator
         if l:p > l:lo && l:p < l:hi
             call add(l:fractions, [l:n, a:denominator])
         endif
-	   let l:n += 1
-	endwhile
+        let l:n += 1
+    endwhile
     return l:fractions
 endfunction
 
@@ -116,7 +116,7 @@ function! foldtext#FoldText() abort
         let l:spaces = repeat(' ', &tabstop)
         let l:line = substitute(getline(l:fs), '\t', l:spaces, 'g')
     endif
- 
+
     let l:foldEnding = strpart(getline(v:foldend), indent(v:foldend), 3)
 
     let l:endBlockChars = ['end', '}', ']', ')']
