@@ -47,18 +47,18 @@ unlet defaults
 function! s:FractionsBetween(lo, hi, denominator)
     " Find all fractions between [a, b] and [c, d] with denominator equal
     " to `a:denominator'
-    let lo = a:lo[0] / a:lo[1]
-    let hi = a:hi[0] / a:hi[1]
-    let fractions = []
-	let n = 1.0
-	while n < a:denominator
-        let p = n / a:denominator
-        if p > lo && p < hi
-            call add(fractions, [n, a:denominator])
+    let l:lo = a:lo[0] / a:lo[1]
+    let l:hi = a:hi[0] / a:hi[1]
+    let l:fractions = []
+	let l:n = 1.0
+	while l:n < a:denominator
+        let l:p = l:n / a:denominator
+        if l:p > l:lo && l:p < l:hi
+            call add(l:fractions, [l:n, a:denominator])
         endif
-	   let n += 1
+	   let l:n += 1
 	endwhile
-    return fractions
+    return l:fractions
 endfunction
 
 function! s:FractionSearch(proportion, denominator)
@@ -67,42 +67,42 @@ function! s:FractionSearch(proportion, denominator)
         return [[0.0, 1], [1.0, 1]]
     endif
 
-    let [lo, hi] = s:FractionSearch(a:proportion, a:denominator - 1)
-    let fractionsBetween = s:FractionsBetween(lo, hi, a:denominator)
-    for fraction in fractionsBetween
-        let f = fraction[0] / fraction[1]
-        if a:proportion >= f
-            let lo = fraction
+    let [l:lo, l:hi] = s:FractionSearch(a:proportion, a:denominator - 1)
+    let l:fractionsBetween = s:FractionsBetween(l:lo, l:hi, a:denominator)
+    for l:fraction in l:fractionsBetween
+        let l:f = l:fraction[0] / l:fraction[1]
+        if a:proportion >= l:f
+            let l:lo = l:fraction
         else
-            let hi = fraction
+            let l:hi = l:fraction
             break
         endif
     endfor
-    return [lo, hi]
+    return [l:lo, l:hi]
 endfunction
 
 function! s:FractionNearest(proportion, maxDenominator)
     " Find the neareset fraction to `a:proportion' (which is a float),
     " but using fractions with denominator less than `a:maxDenominator'.
-    let [lo, hi] = s:FractionSearch(a:proportion, a:maxDenominator)
-    let mid = (lo[0] / lo[1] + hi[0] / hi[1]) / 2
-    if a:proportion > mid
-        return hi
+    let [l:lo, l:hi] = s:FractionSearch(a:proportion, a:maxDenominator)
+    let l:mid = (l:lo[0] / l:lo[1] + l:hi[0] / l:hi[1]) / 2
+    if a:proportion > l:mid
+        return l:hi
     else
-        return lo
+        return l:lo
     endif
 endfunction
 
 function! s:FractionFormat(fraction)
     " Format a fraction: [a, b] --> 'a/b'
-    let [n, d] = a:fraction
-    if n == 0.0
+    let [l:n, l:d] = a:fraction
+    if l:n == 0.0
         return g:FoldText_epsilon
     endif
-    if d != 1
-        return printf("%.0f%s%d", n, g:FoldText_division, d)
+    if l:d != 1
+        return printf("%.0f%s%d", l:n, g:FoldText_division, l:d)
     endif
-    return printf("%.0f", n)
+    return printf("%.0f", l:n)
 endfunction
 
 function! s:CalculateSignColumnWidth() abort
@@ -149,57 +149,57 @@ function! FoldText()
     " let g:FoldText_epsilon = '0'
     " let g:FoldText_denominator = 25
     "
-    let fs = v:foldstart
-    while getline(fs) =~ '^\s*$'
-        let fs = nextnonblank(fs + 1)
+    let l:fs = v:foldstart
+    while getline(l:fs) =~ '^\s*$'
+        let l:fs = nextnonblank(l:fs + 1)
     endwhile
-    if fs > v:foldend
-        let line = getline(v:foldstart)
+    if l:fs > v:foldend
+        let l:line = getline(v:foldstart)
     else
-        let spaces = repeat(' ', &tabstop)
-        let line = substitute(getline(fs), '\t', spaces, 'g')
+        let l:spaces = repeat(' ', &tabstop)
+        let l:line = substitute(getline(l:fs), '\t', l:spaces, 'g')
     endif
  
-    let foldEnding = strpart(getline(v:foldend), indent(v:foldend), 3)
+    let l:foldEnding = strpart(getline(v:foldend), indent(v:foldend), 3)
 
-    let endBlockChars = ['end', '}', ']', ')']
-    let endBlockRegex = printf('^\s*\(%s\);\?$', join(endBlockChars, '\|'))
-    let endCommentRegex = '\s*\*/$'
-    let startCommentBlankRegex = '\v^\s*/\*!?\s*$'
+    let l:endBlockChars = ['end', '}', ']', ')']
+    let l:endBlockRegex = printf('^\s*\(%s\);\?$', join(l:endBlockChars, '\|'))
+    let l:endCommentRegex = '\s*\*/$'
+    let l:startCommentBlankRegex = '\v^\s*/\*!?\s*$'
 
-    if foldEnding =~ endBlockRegex
-        let foldEnding = " " . g:FoldText_placeholder . " " . foldEnding
-    elseif foldEnding =~ endCommentRegex
-        if getline(v:foldstart) =~ startCommentBlankRegex
-            let nextLine = substitute(getline(v:foldstart + 1), '\v\s*\*', '', '')
-            let line = line . nextLine
+    if l:foldEnding =~ l:endBlockRegex
+        let l:foldEnding = " " .. g:FoldText_placeholder .. " " .. l:foldEnding
+    elseif l:foldEnding =~ l:endCommentRegex
+        if getline(v:foldstart) =~ l:startCommentBlankRegex
+            let l:nextLine = substitute(getline(v:foldstart + 1), '\v\s*\*', '', '')
+            let l:line = l:line .. l:nextLine
         endif
-        let foldEnding = " " . g:FoldText_placeholder . " " . foldEnding
+        let l:foldEnding = " " .. g:FoldText_placeholder .. " " .. l:foldEnding
     else
-        let foldEnding = " " . g:FoldText_placeholder
+        let l:foldEnding = " " .. g:FoldText_placeholder
     endif
-    let foldColumnWidth = &foldcolumn ? 1 : 0
-    let numberColumnWidth = &number ? strwidth(line('$')) : 0
-    let signColumnWidth = s:CalculateSignColumnWidth()
-    let width = winwidth(0) - foldColumnWidth - numberColumnWidth - g:FoldText_gap
-    let width -= signColumnWidth
+    let l:foldColumnWidth = &foldcolumn ? 1 : 0
+    let l:numberColumnWidth = &number ? strwidth(line('$')) : 0
+    let l:signColumnWidth = s:CalculateSignColumnWidth()
+    let l:width = winwidth(0) - l:foldColumnWidth - l:numberColumnWidth - g:FoldText_gap
+    let l:width -= l:signColumnWidth
 
-    let foldSize = 1 + v:foldend - v:foldstart
-    let foldSizeStr = printf("%s%s%s", g:FoldText_line, g:FoldText_multiplication, foldSize)
+    let l:foldSize = 1 + v:foldend - v:foldstart
+    let l:foldSizeStr = printf("%s%s%s", g:FoldText_line, g:FoldText_multiplication, l:foldSize)
 
-    let foldLevelStr = g:FoldText_level . g:FoldText_multiplication . v:foldlevel . " "
+    let l:foldLevelStr = g:FoldText_level .. g:FoldText_multiplication .. v:foldlevel .. " "
 
-    let proportion = (foldSize * 1.0) / line("$")
-    let foldFraction = s:FractionNearest(proportion, g:FoldText_denominator)
-    let foldFractionStr = printf(" %s%s%s ", g:FoldText_whole, g:FoldText_multiplication, s:FractionFormat(foldFraction))
-    let ending = foldSizeStr . foldFractionStr . foldLevelStr
+    let l:proportion = (l:foldSize * 1.0) / line("$")
+    let l:foldFraction = s:FractionNearest(l:proportion, g:FoldText_denominator)
+    let l:foldFractionStr = printf(" %s%s%s ", g:FoldText_whole, g:FoldText_multiplication, s:FractionFormat(l:foldFraction))
+    let l:ending = l:foldSizeStr .. l:foldFractionStr .. l:foldLevelStr
 
-    if strwidth(line . foldEnding . ending) >= width
-        let line = strpart(line, 0, width - strwidth(foldEnding . ending))
+    if strwidth(l:line .. l:foldEnding .. l:ending) >= l:width
+        let l:line = strpart(l:line, 0, l:width - strwidth(l:foldEnding .. l:ending))
     endif
 
-    let expansionStr = repeat(" ", g:FoldText_gap + width - strwidth(line . foldEnding . ending))
-    return line . foldEnding . expansionStr . ending
+    let l:expansionStr = repeat(" ", g:FoldText_gap + l:width - strwidth(l:line .. l:foldEnding .. l:ending))
+    return l:line .. l:foldEnding .. l:expansionStr .. l:ending
 endfunction
 
 set foldtext=FoldText()
